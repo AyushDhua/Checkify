@@ -1,126 +1,93 @@
-# Checkify — Deceptive Pattern Inference API
+# Checkify 🕵️‍♀️
 
-A production-quality Flask backend for serving a trained TensorFlow/Keras model that detects deceptive patterns (dark patterns) in text.
+Checkify is an ML-powered system designed to automatically detect and highlight **Deceptive Patterns** (also known as Dark Patterns) on e-commerce sites and websites. 
+
+It consists of two main components running in tandem:
+1. **Chrome Extension (Frontend)**: Scans web pages for textual elements, sends them for analysis, and highlights manipulative UI elements right in your browser.
+2. **Flask Inference API (Backend)**: Uses a trained TensorFlow/Keras neural network to classify text snippets into categories like "Scarcity", "Urgency", etc., in real time.
 
 ---
 
-## Project Structure
+## 🌟 How It Works
 
-```
+1. You visit a webpage.
+2. The **Checkify Chrome Extension** extracts text elements from the site and sends them to the local Flask backend.
+3. The **Flask API** tokenizes the text, passes it through the pre-trained ML model, and returns the confidence scores for any detected dark patterns.
+4. The Extension paints a visible overlay on the screen exactly where the manipulative text is located, protecting you from deceptive designs!
+
+---
+
+## 📂 Project Structure
+
+```text
 Checkify/
 │
-├── model/                        ← DROP YOUR MODEL FILES HERE (see below)
+├── Checkify/                     ← Chrome Extension files
+│   ├── manifest.json
+│   ├── background.js
+│   ├── content.js
+│   ├── content.css
+│   ├── popup.html
+│   └── icons/
+│
+├── model/                        ← Trained Keras Model & Encoders
 │   ├── dark_pattern_model.h5
 │   ├── tokenizer.pkl
 │   └── label_encoder.pkl
 │
-├── app.py                        ← Flask app + routing + validation
-├── model_utils.py                ← ML loading, preprocessing, inference
-├── config.py                     ← All constants (paths, hyperparameters)
-├── requirements.txt
-└── README.md
+├── app.py                        ← Flask API Entry-point
+├── config.py                     ← Application Constants
+├── model_utils.py                ← ML Inference logic
+├── requirements.txt              ← Python Dependencies
+└── README.md                     ← You are here!
 ```
-
-> **The `model/` folder ships empty.** You must manually place the three artefact files inside it before starting the server. The server **will not start** without them.
 
 ---
 
-## Required Model Files
+## 🚀 Setup & Installation
 
-| File | Description |
-|------|-------------|
-| `model/deceptive_pattern_model.h5` | Trained Keras model |
-| `model/tokenizer.pkl` | Fitted `Tokenizer` instance (pickle) |
-| `model/label_encoder.pkl` | Fitted `LabelEncoder` instance (pickle) |
+To run this project, you need to start the Flask backend and load the unpacked extension into Chrome.
 
----
+### Step 1: Start the Python Backend
 
-## Setup — Step by Step
-
-### 1. Create a virtual environment
+We have set up a virtual environment using Python 3.11 with all dependencies installed.
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-```
+# 1. Open your terminal in the root folder
+cd /path/to/Checkify
 
-### 2. Install dependencies
+# 2. Activate the virtual environment
+source .venv/bin/activate
 
-```bash
-pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-### 3. Place model artefacts
-
-Copy your trained files into the `model/` directory:
-
-```
-model/deceptive_pattern_model.h5
-model/tokenizer.pkl
-model/label_encoder.pkl
-```
-
-### 4. (Optional) Adjust `config.py`
-
-If your model was trained with a different sequence length, edit:
-
-```python
-# config.py
-MAX_SEQUENCE_LEN: int = 100   # ← change to match training
-```
-
-### 5. Start the server
-
-```bash
+# 3. Start the Flask server
 python app.py
 ```
+*Expected output: The backend should say "All artefacts ready" and run on `http://127.0.0.1:8000`.*
 
-Expected startup output:
-```
-2026-01-01T12:00:00  [INFO]  __main__ — Loading model artefacts …
-2026-01-01T12:00:02  [INFO]  __main__ — Keras model loaded from model/deceptive_pattern_model.h5
-2026-01-01T12:00:02  [INFO]  __main__ — Loaded tokenizer from model/tokenizer.pkl
-2026-01-01T12:00:02  [INFO]  __main__ — Loaded label_encoder from model/label_encoder.pkl
-2026-01-01T12:00:02  [INFO]  __main__ — All artefacts ready in 1.847 s
- * Running on http://127.0.0.1:8000
-```
+### Step 2: Install the Chrome Extension
+
+1. Open Google Chrome and navigate to `chrome://extensions/`.
+2. Toggle **"Developer mode"** ON (top right corner).
+3. Click the **"Load unpacked"** button (top left).
+4. Select the inner `Checkify/Checkify` directory from this project.
+5. The extension is now active and will communicate with your local Flask server!
 
 ---
 
-## API Reference
+## 🔌 API Reference (For Developers)
 
-### `GET /health`
+If you are modifying the backend or creating a different client, the API exposes the following:
 
-Liveness probe.
+**Endpoint:** `POST /`
 
-```bash
-curl http://127.0.0.1:8000/health
-```
-
+**Payload:**
 ```json
-{ "status": "ok" }
-```
-
----
-
-### `POST /predict`
-
-Run inference on one or more text strings.
-
-**Request**
-
-```http
-POST /predict
-Content-Type: application/json
-
 {
   "tokens": ["limited time offer", "only 2 seats left"]
 }
 ```
 
-**Response (200)**
-
+**Response (200 OK):**
 ```json
 {
   "result": [
@@ -134,57 +101,9 @@ Content-Type: application/json
 }
 ```
 
-**Error Responses**
-
-| Status | Cause |
-|--------|-------|
-| 400 | Missing/invalid JSON body |
-| 400 | Missing `tokens` key |
-| 400 | `tokens` is not an array |
-| 400 | Empty `tokens` array |
-| 400 | Non-string element inside `tokens` |
-| 500 | Internal model inference error |
-
-All errors follow the shape:
-```json
-{ "error": "Human-readable description." }
-```
-
 ---
 
-## Preprocessing Configuration
+## 🛠 Model Modifications
 
-Defined in `config.py`:
-
-| Constant | Default | Description |
-|----------|---------|-------------|
-| `MAX_SEQUENCE_LEN` | `100` | Pad/truncate to this many tokens |
-| `PADDING` | `"post"` | Where to pad short sequences |
-| `TRUNCATING` | `"post"` | Where to cut long sequences |
-| `BATCH_SIZE` | `32` | Sequences per `model.predict()` call |
-
-**These must match the values used during model training.**
-
----
-
-## Production Deployment (Gunicorn)
-
-For production, never use the Flask dev server. Use Gunicorn:
-
-```bash
-pip install gunicorn
-gunicorn -w 1 -b 127.0.0.1:8000 "app:app"
-```
-
-> Use `-w 1` (single worker) when the model is large, to avoid duplicating GPU memory across workers.
-
----
-
-## CORS
-
-CORS is enabled for all origins (`*`) so the browser extension can call the API directly. Restrict origins in production by editing:
-
-```python
-# app.py
-CORS(app, resources={r"/*": {"origins": "https://your-extension-origin"}})
-```
+The `model/` directory ships with pre-trained weights (`.h5`) and standard tokenization (`.pkl`) artifacts. Ensure these files are always present before running the API.
+If you retrain your model, simply drop the new `.h5` and `.pkl` files here and restart the backend. No code changes needed!
