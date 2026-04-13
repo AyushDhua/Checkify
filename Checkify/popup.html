@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkify</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --white:       #ffffff;
+        --bg:          #f7f7f8;
+        --surface:     #ffffff;
+        --border:      #e6e6e9;
+        --text:        #111114;
+        --text-sub:    #6b6b7b;
+        --text-muted:  #adadbe;
+        --ink:         #111114;      /* button fill — solid, no gradient */
+        --ink-hover:   #2a2a35;
+        --radius:      14px;
+        --radius-sm:   10px;
+        --radius-pill: 100px;
+      }
+
+      body {
+        width: 340px;
+        background: var(--white);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+        font-size: 13.5px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ════════════════════════════════════════════════════════ HEADER */
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 16px 18px 14px;
+        border-bottom: 1px solid var(--border);
+        background: var(--white);
+      }
+
+      .logo {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .brand { flex: 1; }
+
+      .brand-name {
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: -0.2px;
+        color: var(--text);
+      }
+
+      .brand-sub {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 1px;
+      }
+
+      /* Status pill */
+      .status-pill {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 10.5px;
+        font-weight: 600;
+        color: #1b8a5a;
+        background: #edfbf4;
+        border: 1px solid #c3eedd;
+        padding: 4px 9px 4px 7px;
+        border-radius: var(--radius-pill);
+        letter-spacing: 0.2px;
+      }
+
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        background: #22c274;
+        border-radius: 50%;
+        animation: blink 2.2s ease-in-out infinite;
+      }
+
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.3; }
+      }
+
+      /* ════════════════════════════════════════════════════════════ BODY */
+      .body {
+        padding: 16px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: var(--white);
+      }
+
+      /* ════════════════════════════════════════════════════ SCAN BUTTON */
+      .scan-btn {
+        width: 100%;
+        padding: 13px 20px;
+        border: none;
+        border-radius: var(--radius-pill);
+        background: var(--ink);
+        color: #fff;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: -0.1px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background 0.15s, transform 0.1s;
+      }
+
+      .scan-btn:hover:not(:disabled) { background: var(--ink-hover); }
+      .scan-btn:active:not(:disabled) { transform: scale(0.985); }
+      .scan-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+      .btn-icon { font-size: 15px; line-height: 1; }
+      .spin { display: inline-block; animation: spin 0.75s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      /* ═══════════════════════════════════════════════════ STATUS STRIP */
+      .status-bar {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 13px;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        font-weight: 500;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text-sub);
+        animation: slideDown 0.18s ease;
+      }
+
+      .status-bar.visible { display: flex; }
+
+      @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-5px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      .status-bar.scanning { background: #f5f5ff; border-color: #d6d6ff; color: #5555cc; }
+      .status-bar.clean    { background: #f0fbf5; border-color: #c3eedd; color: #1b8a5a; }
+      .status-bar.error    { background: #fff5f5; border-color: #ffd6d6; color: #cc3333; }
+
+      .s-icon { font-size: 13px; }
+
+      /* ═══════════════════════════════════════════════════ RESULTS PANEL */
+      .results-panel {
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+        animation: slideDown 0.2s ease;
+      }
+      .results-panel.visible { display: flex; }
+
+      /* Stat Summary */
+      .stat-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 10px 14px;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.15s ease;
+      }
+      .stat-summary:hover { background: #f0f0f2; }
+      .stat-summary-content {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+      }
+
+      .stat-val {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        color: var(--text);
+        line-height: 1;
+      }
+
+      .stat-val.alert { color: #d93025; }
+      .stat-val.ok    { color: #1b8a5a; }
+
+      .stat-lbl {
+        font-size: 13.5px;
+        color: #6b6b7b;
+        font-weight: 500;
+      }
+
+      .chevron {
+        width: 18px;
+        height: 18px;
+        color: var(--text-muted);
+        transition: transform 0.2s ease;
+      }
+      .stat-summary.expanded .chevron { transform: rotate(180deg); }
+
+      .pattern-details {
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .pattern-details.expanded { display: flex; }
+
+      /* Pattern rows */
+      .pattern-list { display: flex; flex-direction: column; gap: 4px; }
+
+      .pattern-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 13px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        transition: border-color 0.12s;
+      }
+
+      .pattern-row:hover { border-color: #ccc; }
+
+      .p-swatch {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .p-name {
+        flex: 1;
+        font-size: 12.5px;
+        font-weight: 500;
+        color: var(--text);
+      }
+
+      .p-count {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: var(--text-sub);
+        background: var(--white);
+        border: 1px solid var(--border);
+        padding: 1px 8px;
+        border-radius: var(--radius-pill);
+        min-width: 26px;
+        text-align: center;
+      }
+
+      /* Clean state */
+      .clean-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        padding: 18px 0 10px;
+      }
+
+      .clean-icon { font-size: 30px; }
+      .clean-title { font-size: 13.5px; font-weight: 700; color: var(--text); }
+      .clean-sub   { font-size: 11.5px; color: var(--text-muted); }
+
+      /* ════════════════════════════════════════════════════════ DIVIDER */
+      .divider { height: 1px; background: var(--border); }
+
+      /* ════════════════════════════════════════════════════════ FOOTER */
+      .footer { padding: 11px 18px 14px; }
+
+      .clear-btn {
+        width: 100%;
+        padding: 9px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-pill);
+        background: transparent;
+        color: var(--text-muted);
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.13s, color 0.13s, border-color 0.13s;
+      }
+
+      .clear-btn:hover:not(:disabled) {
+        background: var(--bg);
+        color: var(--text-sub);
+        border-color: #bbb;
+      }
+
+      .clear-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <img src="icons/icon.png" alt="Checkify Logo" style="width:100%; height:100%; object-fit:contain;" />
+      </div>
+      <div class="brand">
+        <div class="brand-name">Checkify</div>
+        <div class="brand-sub">Dark Pattern Detector</div>
+      </div>
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        Active
+      </div>
+    </header>
+
+    <!-- Body -->
+    <div class="body">
+
+      <button id="scanBtn" class="scan-btn">
+        <span id="btnIcon" class="btn-icon">⚡</span>
+        <span id="btnLabel">Scan This Page</span>
+      </button>
+
+      <div id="statusBar" class="status-bar">
+        <span id="statusIcon" class="s-icon"></span>
+        <span id="statusText"></span>
+      </div>
+
+      <div id="resultsPanel" class="results-panel">
+
+        <div id="statSummary" class="stat-summary">
+          <div class="stat-summary-content">
+            <span id="countNum" class="stat-val">0</span>
+            <span class="stat-lbl">Dark Patterns Detected</span>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+
+        <div id="patternDetails" class="pattern-details">
+          <div id="patternList" class="pattern-list"></div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <footer class="footer">
+      <button id="clearBtn" class="clear-btn" disabled>✕ &nbsp;Clear Highlights</button>
+    </footer>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

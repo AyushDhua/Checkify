@@ -1,0 +1,10 @@
+# Core
+flask>=3.0,<4.0
+flask-cors>=4.0,<5.0
+
+# ML / inference  (requires Python 3.9 – 3.12; TF has no py3.14 wheels yet)
+tensorflow>=2.13
+numpy>=1.24,<2.0
+
+# Utility (scikit-learn provides LabelEncoder used during training)
+scikit-learn>=1.3,<2.0
