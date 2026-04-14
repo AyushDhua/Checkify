@@ -1,6 +1,6 @@
 # Checkify — Deceptive Pattern Inference API
 
-A production-quality Flask backend for serving a trained TensorFlow/Keras model that detects deceptive patterns (dark patterns) in text.
+A production-quality Flask backend for serving a trained TensorFlow/Keras model that detects deceptive patterns (dark patterns) in e-commerce website.
 
 ---
 
