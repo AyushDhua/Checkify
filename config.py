@@ -25,7 +25,7 @@ LABEL_ENCODER_PATH = os.path.join(MODEL_DIR, "label_encoder.pkl")
 # Preprocessing hyperparameters
 # Must match the values used during training.
 # ---------------------------------------------------------------------------
-MAX_SEQUENCE_LEN: int = 100   # pad / truncate every sequence to this length
+MAX_SEQUENCE_LEN: int = 50    # pad / truncate every sequence to this length
 PADDING: str = "post"         # 'pre' | 'post'
 TRUNCATING: str = "post"      # 'pre' | 'post'
 
