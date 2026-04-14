@@ -10,7 +10,7 @@
  * network concerns and avoids CORS preflight issues in some browser configs.
  */
 
-const API_URL = "http://127.0.0.1:8000/";
+const API_URL = "http://127.0.0.1:2910/";
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.action !== "predict") return;
