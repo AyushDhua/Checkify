@@ -40,8 +40,8 @@ Checkify/
 ### 1. Create a virtual environment
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+python3 -m venv venv
+source venv/bin/activate          # Windows: .venv\Scripts\activate
 ```
 
 ### 2. Install dependencies
@@ -51,7 +51,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 3. Place model artefacts
+### 3. Check model artefacts
 
 Copy your trained files into the `model/` directory:
 
@@ -68,12 +68,13 @@ If your model was trained with a different sequence length, edit:
 ```python
 # config.py
 MAX_SEQUENCE_LEN: int = 100   # ← change to match training
+##100 is fine.
 ```
 
 ### 5. Start the server
 
 ```bash
-python app.py
+python3 app.py
 ```
 
 Expected startup output:
@@ -163,21 +164,6 @@ Defined in `config.py`:
 | `TRUNCATING` | `"post"` | Where to cut long sequences |
 | `BATCH_SIZE` | `32` | Sequences per `model.predict()` call |
 
-**These must match the values used during model training.**
-
----
-
-## Production Deployment (Gunicorn)
-
-For production, never use the Flask dev server. Use Gunicorn:
-
-```bash
-pip install gunicorn
-gunicorn -w 1 -b 127.0.0.1:8000 "app:app"
-```
-
-> Use `-w 1` (single worker) when the model is large, to avoid duplicating GPU memory across workers.
-
 ---
 
 ## CORS
@@ -188,3 +174,117 @@ CORS is enabled for all origins (`*`) so the browser extension can call the API 
 # app.py
 CORS(app, resources={r"/*": {"origins": "https://your-extension-origin"}})
 ```
+
+---
+
+## Loading Checkify as a Chrome Extension
+
+Checkify ships with a browser extension that sends selected text to the `/predict` endpoint and displays detected dark patterns inline. Follow the steps below to sideload it in developer mode — **no Chrome Web Store listing required**.
+
+> **Prerequisites:** The Flask server must be running on `http://127.0.0.1:8000` before you activate the extension.
+
+---
+
+### Step 1 — Make sure the Flask server is running
+
+```bash
+source venv/bin/activate          # Windows: .venv\Scripts\activate
+python3 app.py
+```
+
+You should see `Running on http://127.0.0.1:8000` in the terminal. Keep this terminal open.
+
+---
+
+### Step 2 — Open the Extensions management page
+
+| Browser | How to open |
+|---------|-------------|
+| **Google Chrome** | Navigate to `chrome://extensions` in the address bar |
+| **Microsoft Edge** | Navigate to `edge://extensions` |
+| **Brave** | Navigate to `brave://extensions` |
+| **Arc** | Open Settings → Extensions → Manage Extensions |
+| **Firefox** | Navigate to `about:debugging#/runtime/this-firefox` (see Firefox note below) |
+
+---
+
+### Step 3 — Enable Developer Mode
+
+In the top-right corner of the Extensions page, toggle **Developer mode** ON.
+
+```
+┌─────────────────────────────────────────┐
+│  Extensions              Developer mode ●│
+└─────────────────────────────────────────┘
+```
+
+Once enabled, three new buttons appear: **Load unpacked**, **Pack extension**, and **Update**.
+
+---
+
+### Step 4 — Load the unpacked extension
+
+1. Click **Load unpacked**.
+2. In the file-picker dialog, navigate to the root of this repository (`Checkify/`).
+3. Select the `extension/` sub-folder (the one that contains `manifest.json`).
+4. Click **Select Folder** (macOS/Linux) or **Open** (Windows).
+
+The extension card should now appear in the list with the Checkify icon.
+
+---
+
+### Step 5 — Pin the extension (optional but recommended)
+
+1. Click the **puzzle-piece icon** (🧩) in the Chrome toolbar.
+2. Find **Checkify** in the dropdown.
+3. Click the **pin icon** 📌 next to it so the Checkify icon is always visible in the toolbar.
+
+---
+
+### Step 6 — Using the extension
+
+1. Visit any e-commerce website(Amazon, Flipkart, Myntra, Meesho, Nykaa, Snapdeal, eBay, Etc.).
+2. Click the **Checkify icon** in the toolbar (or right-click → *Checkify: Analyse selection*).
+3. A popup will appear showing each detected dark-pattern label and its confidence score, e.g.:
+
+```
+Scarcity   ████████░░  91 %
+Urgency    ███████░░░  88 %
+```
+
+---
+
+### Reloading after code changes
+
+If you edit any extension source file (e.g. `content.js`, `popup.html`), reload the extension so Chrome picks up the changes:
+
+1. Go back to `chrome://extensions`.
+2. Find the Checkify card.
+3. Click the **circular-arrow (↺) reload** button on the card.
+
+Alternatively, press the keyboard shortcut shown next to the extension in the management page.
+
+---
+
+### Firefox — Load Temporary Add-on
+
+Firefox does not support **Load unpacked** the same way. Instead:
+
+1. Open `about:debugging#/runtime/this-firefox`.
+2. Click **Load Temporary Add-on…**.
+3. Navigate to `extension/` and select the `manifest.json` file directly.
+4. The extension is active until Firefox is restarted. Repeat this step each session.
+
+> **Note:** For persistent installation on Firefox, the extension must be signed by Mozilla or installed via Firefox Developer Edition / Nightly with `xpinstall.signatures.required` set to `false` in `about:config`.
+
+---
+
+### Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|-------------|-----|
+| Extension shows "Could not connect" | Flask server is not running | Run `python3 app.py` and keep the terminal open |
+| CORS error in browser console | Server origin whitelist mismatch | Ensure `CORS(app, resources={r"/*": {"origins": "*"}})` is set in `app.py` |
+| "Manifest file is missing or unreadable" | Wrong folder selected | Re-do Step 4 and select the **`extension/`** folder, not the repo root |
+| Predictions always return empty | `tokens` payload is empty | Make sure you have text selected before clicking the extension icon |
+| Extension disappears after browser restart | Loaded in temporary mode (Firefox) | Reload via `about:debugging` or install permanently |
