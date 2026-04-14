@@ -38,7 +38,7 @@ BATCH_SIZE: int = 32          # number of sequences forwarded to model at once
 # Server
 # ---------------------------------------------------------------------------
 HOST: str = "127.0.0.1"
-PORT: int = 8000
+PORT: int = 2910
 DEBUG: bool = False           # never enable in production
 
 # ---------------------------------------------------------------------------
