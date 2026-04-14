@@ -42,9 +42,9 @@ ENV/
 # -----------------------------------------------------------------------------
 # Model training artefacts (NOT needed to run the project)
 # -----------------------------------------------------------------------------
-train.py
-retrain_full.py
-training_data/
+# train.py
+# retrain_full.py
+# training_data/
 
 # -----------------------------------------------------------------------------
 # Jupyter
