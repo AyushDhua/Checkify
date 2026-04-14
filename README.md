@@ -40,8 +40,8 @@ Checkify/
 ### 1. Create a virtual environment
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate          # Windows: .venv\Scripts\activate
+/opt/homebrew/bin/python3.11 -m venv venv         # Windows: py -3.11 -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
 ```
 
 ### 2. Install dependencies
@@ -74,8 +74,28 @@ MAX_SEQUENCE_LEN: int = 100   # ← change to match training
 ### 5. Start the server
 
 ```bash
+python3 app.py        # Windows: python app.py
+```
+
+### All commands at once.(Just copy/paste and run it.)
+#MacOS
+```bash
+/opt/homebrew/bin/python3.11 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
 python3 app.py
 ```
+
+#Windows
+```bash
+py -3.11 -m venv venv
+venv\Scripts\activate
+pip install --upgrade pip
+pip install -r requirements.txt
+python app.py
+```
+
 
 Expected startup output:
 ```
