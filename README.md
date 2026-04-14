@@ -189,7 +189,7 @@ Checkify ships with a browser extension that sends selected text to the `/predic
 
 ```bash
 source venv/bin/activate          # Windows: .venv\Scripts\activate
-python3 app.py
+python app.py
 ```
 
 You should see `Running on http://127.0.0.1:8000` in the terminal. Keep this terminal open.
