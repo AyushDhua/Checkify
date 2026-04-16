@@ -80,6 +80,7 @@ python3 app.py        # Windows: python app.py
 ### All commands at once.(Just copy/paste and run it.)
 #MacOS
 ```bash
+brew install python@3.11
 /opt/homebrew/bin/python3.11 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
